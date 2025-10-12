@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo Gallery - Global Nomad Chronicles</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        nav li {
+            margin: 0 1rem;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        nav a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        main h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+
+        main > p {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+
+        .gallery-categories {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+            gap: 0.5rem;
+        }
+
+        .gallery-filter {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .gallery-filter:hover,
+        .gallery-filter.active {
+            background: #764ba2;
+            transform: translateY(-2px);
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .gallery-item {
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            background: white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+            cursor: pointer;
+        }
+
+        .gallery-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .photo-placeholder {
+            height: 250px;
+            background: linear-gradient(45deg, #f0f0f0, #e0e0e0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 1.1rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .gallery-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            color: white;
+            padding: 1.5rem 1rem 1rem;
+            transform: translateY(100%);
+            transition: transform 0.3s;
+        }
+
+        .gallery-item:hover .gallery-overlay {
+            transform: translateY(0);
+        }
+
+        .gallery-overlay h4 {
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+        }
+
+        .gallery-location {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        /* Video-specific styles */
+        .video-item {
+            position: relative;
+        }
+
+        .video-play-button {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .video-play-button:hover {
+            background: white;
+            transform: translate(-50%, -50%) scale(1.1);
+        }
+
+        .video-duration {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.8rem;
+            z-index: 5;
+        }
+
+        .video-indicator {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: #667eea;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            z-index: 5;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+        }
+
+        .modal-content {
+            position: relative;
+            margin: auto;
+            padding: 20px;
+            width: 90%;
+            max-width: 800px;
+            top: 50%;
+            transform: translateY(-50%);
+            text-align: center;
+        }
+
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: white;
+        }
+
+        #modal-image {
+            max-width: 100%;
+            max-height: 70vh;
+            border-radius: 10px;
+        }
+
+        #modal-video {
+            max-width: 100%;
+            max-height: 70vh;
+            border-radius: 10px;
+        }
+
+        #modal-caption {
+            color: white;
+            margin-top: 15px;
+            font-size: 1.2rem;
+        }
+
+        .modal-placeholder {
+            width: 100%;
+            height: 400px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            border-radius: 10px;
+        }
+
+        #featured-photos {
+            margin-top: 3rem;
+        }
+
+        #featured-photos h2 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 2rem;
+        }
+
+        .featured-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        footer {
+            background: #333;
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 3rem;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 768px) {
+            .gallery-categories {
+                gap: 0.3rem;
+            }
+            
+            .gallery-filter {
+                font-size: 0.8rem;
+                padding: 0.4rem 0.8rem;
+            }
+            
+            .gallery-grid {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Section -->
+    <header>
+        <h1>Global Nomad Chronicles</h1>
+        <p>A Traveler's Path to Teaching</p>
+        
+        <!-- Navigation Menu -->
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="destinations.html">Destinations</a></li>
+                <li><a href="education-insights.html">Education Insights</a></li>
+                <li><a href="about.html">About Me</a></li>
+                <li><a href="gallery.html">Photo Gallery</a></li>
+                <li><a href="resources.html">Resources</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <h1>Photo & Video Gallery</h1>
+        <p>Visual stories from my travels and teaching experiences around the world.</p>
+
+        <!-- Photo Gallery Section -->
+        <section id="photo-gallery">
+            
+            <!-- Gallery Categories/Filters -->
+            <div class="gallery-categories">
+                <button class="gallery-filter active" data-filter="all">All Media</button>
+                <button class="gallery-filter" data-filter="teaching">Teaching Moments</button>
+                <button class="gallery-filter" data-filter="cultural">Cultural Experiences</button>
+                <button class="gallery-filter" data-filter="landscapes">Landscapes</button>
+                <button class="gallery-filter" data-filter="food">Food Adventures</button>
+                <button class="gallery-filter" data-filter="videos">Videos</button>
+                <button class="gallery-filter" data-filter="south-korea">South Korea</button>
+                <button class="gallery-filter" data-filter="saudi-arabia">Saudi Arabia</button>
+                <button class="gallery-filter" data-filter="mexico">Mexico</button>
+                <button class="gallery-filter" data-filter="peru">Peru</button>
+                <button class="gallery-filter" data-filter="malaysia">Malaysia</button>
+                <button class="gallery-filter" data-filter="jordan">Jordan</button>
+            </div>
+            
+            <!-- Gallery Grid -->
+            <div class="gallery-grid">
+                <!-- South Korea Photos -->
+                <div class="gallery-item" data-category="teaching south-korea">
+                    <div class="photo-placeholder">
+                        <p>📚 Teaching in Korean classroom<br><small>Click to view full size</small></p>
+                    </div>
+                    <div class="gallery-overlay">
+                        <h4>Classroom in Daegu</h4>
+                        <p>Working with Korean students</p>
+                        <span class="gallery-location">📍 South Korea</span>
+                    </div>
+                </div>
+                
+                <div class="gallery-item" data-category="cultural south-korea">
+                    <div class="photo-placeholder">
+                        <p>🏯 Korean cultural site<br><small>Click to view full size</small></p>
+                    </div>
+                    <div class="gallery-overlay">
+                        <h4>Temple Discovery</h4>
+                        <p>Learning about Buddhist practices</p>
+                        <span class="gallery-location">📍 South Korea</span>
+                    </div>
+                </div>
+                
+                <div class="gallery-item" data-category="food south-korea">
+                    <div class="photo-placeholder">
+                        <p>🍖 Korean BBQ experience<br><small>Click to view full size</small></p>
+                    </div>
+                    <div class="gallery-overlay">
+                        <h4>Korean BBQ Night</h4>
+                        <p>Sharing meals with colleagues</p>
+                        <span class="gallery-location">📍 South Korea</span>
+                    </div>
+                </div>
+
+                <!-- South Korea Video -->
+                <div class="gallery-item video-item" data-category="cultural south-korea videos">
+                    <div class="photo-placeholder">
+                        <div class="video-indicator">VIDEO</div>
+                        <button class="video-play-button">▶</button>
+                        <div class="video-duration">2:15</div>
+                        <p>🎭 Korean street performance<br><small>Click to watch video</small></p>
+                    </div>
+                    <div class="gallery-overlay">
+                        <h4>Street Performance in Seoul</h4>
+                        <p>Traditional Korean music and dance</p>
+                        <span class="gallery-location">📍 South Korea</span>
+                    </div>
+                </div>
+                
+                <!-- Saudi Arabia Photos -->
+                <div class="gallery-item" data-category="teaching saudi-arabia">
+                    <div class="photo-placeholder">
+                        <p>👩‍🏫 Teaching environment in Saudi Arabia<br><small>Click to view full size</small></p>
+                    </div>
+                    <div class="gallery-overlay">
+                        <h4>Special Education Class</h4>
+                        <p>Adaptive learning in Dammam</p>
+                        <span class="gallery-location">📍 Saudi Arabia</span>
+                    </div>
+                </div>
+                
+                <div class="gallery-item" data-category="landscapes saudi-arabia">
+                    <div class="photo-placeholder">
+                        <p>🏜️ Saudi Arabian desert<br><small>Click to view full size</small></p>
+                    </div>
+                    <div class="gallery-overlay">
+                        <h4>Desert Sunset</h4>
+                        <p>The beauty of the Arabian landscape</p>
+                        <span class="gallery-location">📍 Saudi Arabia</span>
+                    </div>
+                </div>
+                
+                <div class="gallery-item" data-category="cultural saudi-arabia">
+                    <div class="photo-placeholder">
+                        <p>🎉 Cultural landmark<br><small>Click to view full size</small></p>
+                    </div>
+                    <div class="gallery-overlay">
+                        <h4>Cultural Festival</h4>
+                        <p>Participating in local celebrations</p>
+                        <span class="gallery-location">📍 Saudi Arabia</span>
+                    </div>
+                </div>
+
+                <!-- Saudi Arabia Video -->
+                <div class="gallery-item video-item" data-category="cultural saudi-arabia videos">
+                    <div class="photo-placeholder">
+                        <div class="video-indicator">VIDEO</div>
+                        <button class="video-play-button">▶</button>
+                        <div class="video-duration">1:43</div>
+                        <p>🏕️ Desert camp experience<br><small>Click to watch video</small></p>
+                    </div>
+                    <div class="gallery-overlay">
+                        <h4>Arabian Desert Night</h4>
+                        <p>Traditional Bedouin hospitality</p>
+                        <span class="gallery-location">📍 Saudi Arabia</span>
+                    </div>
+                </div>
+                
+                <!-- Mexico Photos -->
+                <div class="gallery-item" data-category="cultural mexico">
+                    <div class="photo-placeholder">
+                        <p>🏛️ Mexican cultural site<br><small>Click to view full size</small></p>
+                    </div>
+                    <div class="gallery-overlay">
+                        <h4>Ancient Ruins</h4>
+                        <p>Exploring Mexico's rich history</p>
+                        <span class="gallery-location">📍 Mexico</span>
+                    </div>
+                </div>
+                
+                <div class="gallery-item" data-category="teaching mexico">
+                    <div class="photo-placeholder">
+                        <p>📖 Local education observation<br><small>Click to view full size</small></p>
+                    </div>
+                    <div class="gallery-overlay">
+                        <h4>Educational Visit</h4>
+                        <p>Learning from Mexican educators</p>
+                        <span class="gallery-location">📍 Mexico</span>
+                    </div>
+                </div>
+
+                <!-- Mexico Video -->
+                <div class="gallery-item video-item" data-category="cultural mexico videos">
+                    <div class="photo-placeholder">
+                        <div class="video-indicator">VIDEO</div>
+                        <button class="video-play-button">▶</button>
+                        <div class="video-duration">3:02</div>
+                        <p>🎉 Day of the Dead celebration<br><small>Click to watch video</small></p>
+                    </div>
+                    <div class="gallery-overlay">
+                        <h4>Día de los Muertos</h4>
+                        <p>Vibrant celebration of life and memory</p>
+                        <span class="gallery-location">📍 Mexico</span>
+                    </div>
+                </div>
+                
+                <!-- Peru Photos -->
+                <div class="gallery-item" data-category="landscapes peru">
+                    <div class="photo-placeholder">
+                        <p>⛰️ Peruvian landmark<br><small>Click to view full size</small></p>
+                    </div>
+                    <div class="gallery-overlay">
+                        <h4>Machu Picchu</h4>
+                        <p>Ancient wonder of the world</p>
+                        <span class="gallery-location">📍 Peru</span>
+                    </div>
+                </div>
+                
+                <div class="gallery-item" data-category="cultural peru">
+                    <div class="photo-placeholder">
+                        <p>🛍️ Cultural experience<br><small>Click to view full size</small></p>
+                    </div>
+                    <div class="gallery-overlay">
+                        <h4>Local Market</h4>
+                        <p>Immersing in Peruvian culture</p>
+                        <span class="gallery-location">📍 Peru</span>
+                    </div>
+                </div>
+
+                <!-- Peru Video -->
+                <div class="gallery-item video-item" data-category="landscapes peru videos">
+                    <div class="photo-placeholder">
+                        <div class="video-indicator">VIDEO</div>
+                        <button class="video-play-button">▶</button>
+                        <div class="video-duration">4:20</div>
+                        <p>🚂 Train journey to Machu Picchu<br><small>Click to watch video</small></p>
+                    </div>
+                    <div class="gallery-overlay">
+                        <h4>Journey Through the Andes</h4>
+                        <p>Scenic train ride to ancient wonder</p>
+                        <span class="gallery-location">📍 Peru</span>
+                    </div>
+                </div>
+                
+                <!-- Malaysia Photos -->
+                <div class="gallery-item" data-category="cultural malaysia">
+                    <div class="photo-placeholder">
+                        <p>🏢 Malaysian cultural site<br><small>Click to view full size</small></p>
+                    </div>
+                    <div class="gallery-overlay">
+                        <h4>Petronas Towers</h4>
+                        <p>Modern Malaysian architecture</p>
+                        <span class="gallery-location">📍 Malaysia</span>
+                    </div>
+                </div>
+                
+                <div class="gallery-item" data-category="teaching malaysia">
+                    <div class="photo-placeholder">
+                        <p>🎓 Educational observation<br><small>Click to view full size</small></p>
+                    </div>
+                    <div class="gallery-overlay">
+                        <h4>School Visit</h4>
+                        <p>Learning Malaysian teaching methods</p>
+                        <span class="gallery-location">📍 Malaysia</span>
+                    </div>
+                </div>
+
+                <!-- Malaysia Video -->
+                <div class="gallery-item video-item" data-category="food malaysia videos">
+                    <div class="photo-placeholder">
+                        <div class="video-indicator">VIDEO</div>
+                        <button class="video-play-button">▶</button>
+                        <div class="video-duration">2:37</div>
+                        <p>🍜 Street food adventure<br><small>Click to watch video</small></p>
+                    </div>
+                    <div class="gallery-overlay">
+                        <h4>Malaysian Street Food Tour</h4>
+                        <p>Exploring flavors of Kuala Lumpur</p>
+                        <span class="gallery-location">📍 Malaysia</span>
+                    </div>
+                </div>
+                
+                <!-- Jordan Photos -->
+                <div class="gallery-item" data-category="landscapes jordan">
+                    <div class="photo-placeholder">
+                        <p>🏛️ Jordanian landmark<br><small>Click to view full size</small></p>
+                    </div>
+                    <div class="gallery-overlay">
+                        <h4>Petra</h4>
+                        <p>The Rose City carved in stone</p>
+                        <span class="gallery-location">📍 Jordan</span>
+                    </div>
+                </div>
+                
+                <div class="gallery-item" data-category="cultural jordan">
+                    <div class="photo-placeholder">
+                        <p>🐪 Cultural experience<br><small>Click to view full size</small></p>
+                    </div>
+                    <div class="gallery-overlay">
+                        <h4>Bedouin Experience</h4>
+                        <p>Desert hospitality and traditions</p>
+                        <span class="gallery-location">📍 Jordan</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Image Modal for Full View -->
+            <div id="image-modal" class="modal">
+                <div class="modal-content">
+                    <span class="close">&times;</span>
+                    <div class="modal-placeholder">
+                        <div id="modal-caption">Click on any photo to see it in full size!</div>
+                    </div>
+                    <video id="modal-video" controls style="display: none;">
+                        <source src="" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+            </div>
+        </section>
+
+        <!-- Featured Photos Section -->
+        <section id="featured-photos">
+            <h2>Featured Photos</h2>
+            <div class="featured-gallery">
+                <div class="gallery-item" data-category="teaching">
+                    <div class="photo-placeholder">
+                        <p>✨ Best teaching moment<br><small>Click to view full size</small></p>
+                    </div>
+                    <div class="gallery-overlay">
+                        <h4>Breakthrough Moment</h4>
+                        <p>When communication transcends language</p>
+                        <span class="gallery-location">📍 Featured</span>
+                    </div>
+                </div>
+                
+                <div class="gallery-item" data-category="cultural">
+                    <div class="photo-placeholder">
+                        <p>🌟 Most memorable travel experience<br><small>Click to view full size</small></p>
+                    </div>
+                    <div class="gallery-overlay">
+                        <h4>Cultural Discovery</h4>
+                        <p>Finding home in unexpected places</p>
+                        <span class="gallery-location">📍 Featured</span>
+                    </div>
+                </div>
+                
+                <div class="gallery-item" data-category="landscapes">
+                    <div class="photo-placeholder">
+                        <p>🌅 Stunning landscape<br><small>Click to view full size</small></p>
+                    </div>
+                    <div class="gallery-overlay">
+                        <h4>Breathtaking View</h4>
+                        <p>Nature's classroom around the world</p>
+                        <span class="gallery-location">📍 Featured</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2025 Global Nomad Chronicles. All rights reserved.</p>
+        <p>Sharing stories of teaching, travel, and cultural discovery.</p>
+    </footer>
+
+    <script>
+        // Gallery filtering functionality
+        const filterButtons = document.querySelectorAll('.gallery-filter');
+        const galleryItems = document.querySelectorAll('.gallery-item');
+        
+        filterButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                // Remove active class from all buttons
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                // Add active class to clicked button
+                button.classList.add('active');
+                
+                const filter = button.dataset.filter;
+                
+                galleryItems.forEach(item => {
+                    if (filter === 'all') {
+                        item.style.display = 'block';
+                    } else {
+                        if (item.dataset.category.includes(filter)) {
+                            item.style.display = 'block';
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    }
+                });
+            });
+        });
+        
+        // Modal functionality
+        const modal = document.getElementById('image-modal');
+        const modalCaption = document.getElementById('modal-caption');
+        const closeModal = document.querySelector('.close');
+        
+        galleryItems.forEach(item => {
+            item.addEventListener('click', () => {
+                modal.style.display = 'block';
+                
+                // Get the title and description from the overlay
+                const title = item.querySelector('.gallery-overlay h4').textContent;
+                const description = item.querySelector('.gallery-overlay p').textContent;
+                const location = item.querySelector('.gallery-location').textContent;
+                
+                // Check if this is a video item
+                const isVideo = item.classList.contains('video-item');
+                const modalVideo = document.getElementById('modal-video');
+                const modalPlaceholder = document.querySelector('.modal-placeholder');
+                
+                if (isVideo) {
+                    // Hide placeholder and show video
+                    modalPlaceholder.style.display = 'none';
+                    modalVideo.style.display = 'block';
+                    
+                    // You would replace this with your actual video URL
+                    // modalVideo.src = 'path/to/your/video.mp4';
+                    
+                    modalCaption.innerHTML = `
+                        <h3>${title}</h3>
+                        <p>${description}</p>
+                        <p><strong>${location}</strong></p>
+                        <p><em>Video placeholder - Replace with actual video file when available</em></p>
+                    `;
+                } else {
+                    // Show placeholder and hide video
+                    modalPlaceholder.style.display = 'flex';
+                    modalVideo.style.display = 'none';
+                    
+                    modalCaption.innerHTML = `
+                        <h3>${title}</h3>
+                        <p>${description}</p>
+                        <p><strong>${location}</strong></p>
+                        <p><em>Photo placeholder - Replace with actual image when available</em></p>
+                    `;
+                }
+            });
+        });
+        
+        // Close modal when clicking the X
+        closeModal.addEventListener('click', () => {
+            modal.style.display = 'none';
+            // Pause video if it's playing
+            const modalVideo = document.getElementById('modal-video');
+            modalVideo.pause();
+        });
+        
+        // Close modal when clicking outside of it
+        window.addEventListener('click', (event) => {
+            if (event.target === modal) {
+                modal.style.display = 'none';
+                // Pause video if it's playing
+                const modalVideo = document.getElementById('modal-video');
+                modalVideo.pause();
+            }
+        });
+        
+        // Add some animation effects
+        document.addEventListener('DOMContentLoaded', () => {
+            const galleryItems = document.querySelectorAll('.gallery-item');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, {
+                threshold: 0.1
+            });
+            
+            galleryItems.forEach((item, index) => {
+                item.style.opacity = '0';
+                item.style.transform = 'translateY(20px)';
+                item.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s ease ${index * 0.1}s`;
+                observer.observe(item);
+            });
+        });
+    </script>
+</body>
+</html>

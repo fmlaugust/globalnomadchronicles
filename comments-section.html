@@ -1,0 +1,126 @@
+<!-- Comments Section -->
+<section id="comments-section">
+    <div class="comments-container">
+        <h3 class="comments-title">Join the Conversation</h3>
+        
+        <!-- Comment Count -->
+        <div class="comments-count">
+            <p><span id="comment-counter">3</span> comments</p>
+        </div>
+        
+        <!-- Comment Form -->
+        <form id="comment-form" class="comment-form">
+            <h4>Leave a Comment</h4>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="comment-name">Name *</label>
+                    <input type="text" id="comment-name" name="name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="comment-email">Email * (won't be published)</label>
+                    <input type="email" id="comment-email" name="email" required>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="comment-website">Website (optional)</label>
+                <input type="url" id="comment-website" name="website">
+            </div>
+            
+            <div class="form-group">
+                <label for="comment-message">Your Comment *</label>
+                <textarea id="comment-message" name="message" rows="5" placeholder="Share your thoughts, experiences, or questions..." required></textarea>
+            </div>
+            
+            <div class="form-options">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="comment-notifications" name="notifications">
+                    <span class="checkmark"></span>
+                    Notify me of follow-up comments via email
+                </label>
+            </div>
+            
+            <button type="submit" class="submit-button">Post Comment</button>
+        </form>
+        
+        <!-- Existing Comments -->
+        <div class="comments-list">
+            <h4>Comments</h4>
+            
+            <!-- Individual Comment -->
+            <article class="comment">
+                <div class="comment-avatar">
+                    <img src="images/avatars/avatar-1.jpg" alt="Sarah M." loading="lazy">
+                </div>
+                <div class="comment-content">
+                    <div class="comment-header">
+                        <h5 class="comment-author">Sarah M.</h5>
+                        <span class="comment-date">January 16, 2025 at 2:30 PM</span>
+                        <button class="comment-reply-btn" data-comment-id="1">Reply</button>
+                    </div>
+                    <div class="comment-text">
+                        <p>This story really resonated with me! As a special education teacher in the US, I've had similar breakthrough moments. It's amazing how universal these experiences are, regardless of language or culture. Thank you for sharing!</p>
+                    </div>
+                    
+                    <!-- Reply Form (initially hidden) -->
+                    <div class="reply-form" id="reply-form-1" style="display: none;">
+                        <form class="comment-reply-form">
+                            <textarea placeholder="Write a reply..." rows="3" required></textarea>
+                            <div class="reply-actions">
+                                <button type="submit" class="reply-submit">Post Reply</button>
+                                <button type="button" class="reply-cancel" onclick="hideReplyForm(1)">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- Nested Reply -->
+                    <div class="comment-replies">
+                        <article class="comment comment-reply">
+                            <div class="comment-avatar">
+                                <img src="images/avatars/avatar-author.jpg" alt="Global Nomad Chronicles" loading="lazy">
+                            </div>
+                            <div class="comment-content">
+                                <div class="comment-header">
+                                    <h5 class="comment-author">Global Nomad Chronicles <span class="author-badge">Author</span></h5>
+                                    <span class="comment-date">January 16, 2025 at 4:15 PM</span>
+                                </div>
+                                <div class="comment-text">
+                                    <p>Thank you so much, Sarah! It's wonderful to connect with fellow special educators. You're absolutely right about these experiences being universal - it's one of the things that continues to amaze me about working in education internationally.</p>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+            </article>
+            
+            <!-- Another Comment -->
+            <article class="comment">
+                <div class="comment-avatar">
+                    <img src="images/avatars/avatar-2.jpg" alt="Mike T." loading="lazy">
+                </div>
+                <div class="comment-content">
+                    <div class="comment-header">
+                        <h5 class="comment-author">Mike T.</h5>
+                        <span class="comment-date">January 15, 2025 at 8:45 PM</span>
+                        <button class="comment-reply-btn" data-comment-id="2">Reply</button>
+                    </div>
+                    <div class="comment-text">
+                        <p>I'm considering teaching abroad and your stories are so inspiring! Do you have any advice for someone just starting to explore international teaching opportunities?</p>
+                    </div>
+                    
+                    <div class="reply-form" id="reply-form-2" style="display: none;">
+                        <form class="comment-reply-form">
+                            <textarea placeholder="Write a reply..." rows="3" required></textarea>
+                            <div class="reply-actions">
+                                <button type="submit" class="reply-submit">Post Reply</button>
+                                <button type="button" class="reply-cancel" onclick="hideReplyForm(2)">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </div>
+</section>
